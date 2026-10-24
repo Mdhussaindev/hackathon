@@ -1,0 +1,147 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #f8fafc;
+}
+
+.auth-container {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 45% 55%;
+}
+
+.auth-brand {
+  background: linear-gradient(145deg, #101c3d, #163d89 65%, #2563eb);
+  color: white;
+  padding: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.brand-content {
+  max-width: 460px;
+}
+
+.brand-logo, .mobile-logo {
+  width: 55px;
+  height: 55px;
+  display: grid;
+  place-items: center;
+  background: white;
+  color: #2563eb;
+  border-radius: 15px;
+  font-size: 27px;
+  font-weight: 800;
+  margin-bottom: 65px;
+}
+
+.brand-content h1 {
+  font-size: clamp(36px, 4vw, 58px);
+  line-height: 1.12;
+  letter-spacing: -2px;
+}
+
+.brand-content p {
+  color: #dbeafe;
+  line-height: 1.9;
+  font-size: 16px;
+}
+
+.brand-footer {
+  margin-top: 90px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: .7;
+}
+
+.auth-form-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 45px 25px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+}
+
+.eyebrow {
+  color: #2563eb;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 11px;
+}
+
+.auth-card h2 {
+  margin-top: 12px;
+  letter-spacing: -1px;
+}
+
+.auth-form {
+  margin-top: 35px;
+}
+
+.auth-form .ant-input-affix-wrapper {
+  min-height: 48px;
+  border-radius: 9px;
+}
+
+.auth-form .ant-form-item-label label {
+  font-weight: 600;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.auth-button {
+  height: 49px;
+  border-radius: 9px;
+  font-weight: 700;
+  background: #2563eb;
+}
+
+.auth-bottom {
+  text-align: center;
+  margin-top: 28px;
+  color: #64748b;
+}
+
+.auth-bottom a {
+  font-weight: 700;
+}
+
+.mobile-logo {
+  display: none;
+  background: #2563eb;
+  color: white;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 800px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    display: none;
+  }
+
+  .mobile-logo {
+    display: grid;
+  }
+
+  .auth-form-section {
+    min-height: 100vh;
+  }
+}
