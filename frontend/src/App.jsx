@@ -1,17 +1,48 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ConfigProvider } from "antd";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
+import { ConfigProvider } from "antd";
+
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./layouts/DashboardLayout";
+
+import Setup from "./pages/auth/Setup";
+import Login from "./pages/auth/Login";
+import ChangePassword from "./pages/auth/ChangePassword";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import HRDashboard from "./pages/hr/HRDashboard";
+import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 
 import "./styles/global.css";
 
-function ProtectedRoute({ children }) {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+function HomeRedirect() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="page-loader">Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (user.mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  return <Navigate to={`/${user.role}/dashboard`} replace />;
+}
+
+function RequirePasswordChange({ children }) {
+  const { user } = useAuth();
+
+  if (user?.mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
@@ -20,7 +51,7 @@ export default function App() {
       theme={{
         token: {
           colorPrimary: "#2563eb",
-          borderRadius: 9,
+          borderRadius: 10,
           fontFamily: "Inter, Arial, sans-serif",
         },
       }}
@@ -28,20 +59,57 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<HomeRedirect />} />
+            <Route path="/setup" element={<Setup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
 
             <Route
-              path="/dashboard"
+              path="/change-password"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <ChangePassword />
                 </ProtectedRoute>
               }
             />
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <RequirePasswordChange>
+                    <DashboardLayout />
+                  </RequirePasswordChange>
+                </ProtectedRoute>
+              }
+            >
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/hr/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["hr"]}>
+                    <HRDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/employee/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["employee"]}>
+                    <EmployeeDashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            <Route path="*" element={<HomeRedirect />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
