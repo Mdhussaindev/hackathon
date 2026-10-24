@@ -1,48 +1,77 @@
 
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
 import api from "../services/api";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "null");
-    } catch {
-      return null;
-    }
-  });
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const saveSession = (data) => {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setToken(data.token);
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = localStorage.getItem("hcm_token");
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data } = await api.get("/auth/me");
+        setUser(data.user);
+      } catch {
+        localStorage.removeItem("hcm_token");
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  const login = async (credentials) => {
+    const { data } = await api.post("/auth/login", credentials);
+
+    localStorage.setItem("hcm_token", data.token);
     setUser(data.user);
-  };
 
-  const login = async (values) => {
-    const { data } = await api.post("/auth/login", values);
-    saveSession(data);
-  };
-
-  const signup = async (values) => {
-    const { data } = await api.post("/auth/register", values);
-    saveSession(data);
+    return data.user;
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setToken(null);
+    localStorage.removeItem("hcm_token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        isAuthenticated: !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
+  return context;
+};
